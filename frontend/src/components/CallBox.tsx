@@ -115,14 +115,14 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
       
       if(event.candidate){
         socket.emit("iceCandidate",{candidate:event.candidate,receiver})
+       
+        
       }
       
     }
       pc.addTrack(stream.getVideoTracks()[0])
-      console.log(pc);
       
     pc.ontrack=(event)=>{
-      console.log("track",event);
       if(remoteVideoRef.current){
         remoteVideoRef.current.srcObject=new MediaStream([event.track])
         setConnection(true)
@@ -159,12 +159,18 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
   }
   async function startScreen(){
     const screen=await navigator.mediaDevices.getDisplayMedia({video:true})
-    pcRef.current?.addTrack(screen.getTracks()[0])
-    if(myVideo.current){
-      myVideo.current.srcObject=screen
-      myVideo.current.play()
+    if(myVideo.current?.srcObject){
+      (myVideo.current.srcObject as MediaStream).getTracks().forEach(track=>track.stop())
     }
+    myVideo.current!.srcObject=screen
+    myVideo.current!.play()
     if(pcRef.current&&socket){
+
+      const videoTrack= screen.getVideoTracks()[0];
+      const sender = pcRef.current.getSenders().find(s => s.track?.kind === "video");
+      if(sender){
+        await sender.replaceTrack(videoTrack)
+      }
       pcRef.current.onnegotiationneeded=async()=>{
       const offer = await pcRef.current?.createOffer();
       await pcRef.current?.setLocalDescription(offer);
