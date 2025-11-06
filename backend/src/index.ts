@@ -11,6 +11,10 @@ const io = new Server(server, {
   }
 });
 
+app.get("/",(req,res)=>{
+  res.send("Welcome To WebRTC Backend")
+})
+
 let allSocket: {name:string,id:string}[] = [];
 
 io.on("connection", (socket: Socket) => {
