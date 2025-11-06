@@ -12,23 +12,37 @@ A simple WebRTC video call application using React, Vite, Socket.IO, and Node.js
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js (v16+ recommended)
-- npm or yarn
-
 ### Installation
 
-#### Backend
+You can run this application using either Docker or manual installation.
 
+#### Using Docker
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/webrtc.git
+cd webrtc
+
+# Start the application using Docker
+docker-compose up --build
+
+# Access the application at http://localhost:5173
+```
+
+To stop the application:
+```bash
+docker-compose down
+```
+
+#### Manual Setup
+
+##### Backend
 ```bash
 cd backend
 npm install
 npm run dev
 ```
 
-#### Frontend
-
+##### Frontend
 ```bash
 cd frontend
 npm install
