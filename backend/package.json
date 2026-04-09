@@ -12,6 +12,7 @@
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "express": "^5.1.0",
+    "mediasoup": "^3.19.9",
     "socket.io": "^4.8.1",
     "typescript": "^5.8.3",
     "ws": "^8.18.3"

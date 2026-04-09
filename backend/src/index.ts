@@ -1,6 +1,8 @@
 import { Server, Socket } from "socket.io";
 import Express from "express";
 import { createServer } from "http";
+import { createWorker } from "mediasoup";
+
 
 const app = Express();
 const server = createServer(app);

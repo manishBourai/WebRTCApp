@@ -187,7 +187,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     autoPlay
     playsInline
     className={`w-full h-full object-cover ${connect ? "" : "hidden"}`}
-    style={{ transform: "scaleX(-1)" }}
+    style={{  transform: "scaleX(-1)" }}
   />
 
   {/* My Video (initially full screen, becomes PiP when connected) */}
@@ -233,7 +233,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
       Cut Call
     </Button>
     <Button
-      variant={"destructive"}
+      variant={"default"}
       size={"default"}
       onClick={startScreen}
       className={`${connect ? "" : "hidden"}`}
