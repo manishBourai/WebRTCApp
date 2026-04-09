@@ -24,13 +24,16 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     });
 
     // Setup socket connection
-    const socketInstance = io("ws://localhost:8000");
+    const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || `${window.location.protocol === "https:" ? "wss" : "ws"}://localhost:8000`;
+    const socketInstance = io(SOCKET_SERVER_URL, {
+      transports: ["websocket"],
+    });
     setSocket(socketInstance);
 
-    socketInstance.emit("setName",name)
+    socketInstance.emit("setName", name);
 
     socketInstance.on("allUser", (data:{name:string,id:string}[]) => {
-      console.log(socketInstance.id);
+      // console.log(socketInstance.id);
       
       setAllUser(data.filter(e=>e.id!==socketInstance.id));
     });
@@ -45,7 +48,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
   const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})
       pc.addTrack(stream.getVideoTracks()[0])
        pc.ontrack = (event) => {
-          console.log("Remote track event:", event);
+          // console.log("Remote track event:", event);
         if(remoteVideoRef.current){
           remoteVideoRef.current.srcObject= new MediaStream([event.track])
           remoteVideoRef.current.play()

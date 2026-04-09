@@ -24,12 +24,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user, nav }) => {
     <>
       {/* Hamburger (Mobile only) */}
       <button
-        className={`md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-slate-800/80 shadow-xl focus:outline-none border border-indigo-400 hover:bg-indigo-600 transition`}
+        className={`md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-slate-800/80 text-white shadow-xl focus:outline-none border border-indigo-400 hover:bg-indigo-600 transition`}
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Toggle sidebar"
       >
         {/* Hamburger/X Animated Icon */}
-        <svg className="w-7 h-7 transition-all duration-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <svg className="w-7 h-7 text-white transition-all duration-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
