@@ -1,5 +1,5 @@
 import {create} from "zustand"
-import {  Socket } from "socket.io-client"
+import {  io, Socket } from "socket.io-client"
 
 type sender = {
     mySocket: Socket | null
@@ -13,6 +13,7 @@ type sender = {
     setConnection:(value:boolean)=>void
     receiverName:string|null
     setReceiverName:(value:string|null)=>void
+    setSocketIn:()=>void
 
 }
 const Sender=create<sender>((set)=>({
@@ -39,6 +40,18 @@ const Sender=create<sender>((set)=>({
    console.log(value);
    
    set({receiverName:value})
+ },
+ setSocketIn:async()=>{
+  let socket
+  if (!socket) {
+     const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || "http://localhost:8000";
+    console.log("Connecting socket to:", SOCKET_SERVER_URL);
+    
+      socket = io(SOCKET_SERVER_URL,{
+         transports: ["websocket"],
+      });
+  }
+  set({mySocket:socket})
  }
  
  

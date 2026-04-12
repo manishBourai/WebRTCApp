@@ -2,50 +2,62 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { io, Socket } from "socket.io-client";
 import Sender from "@/utils/Sender";
+import { getSocket } from "@/store/socket";
 
 
-const CallBox = () => {
+ const CallBox = () => {
   const myVideo = useRef<HTMLVideoElement | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
-const {setAllUser,receiver,setReceiver,name,connect,setConnection,receiverName,setReceiverName}=Sender()
+const {setAllUser,receiver,setReceiver,name,connect,setConnection,receiverName,setReceiverName,setSocketIn}=Sender()
 const remoteVideoRef=useRef<HTMLVideoElement>(null)
 
 
 
-
+ 
+ function setTheSocket(){
+    return getSocket()
+}
 
   useEffect(() => {
     // Get user media
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((stream) => {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
       if (myVideo.current) {
         myVideo.current.srcObject = stream;
       }
     });
-
-    // Setup socket connection
-    const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || `${window.location.protocol === "https:" ? "wss" : "ws"}://localhost:8000`;
-    const socketInstance = io(SOCKET_SERVER_URL, {
-      transports: ["websocket"],
+    const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || "http://localhost:8000";
+        console.log("Connecting socket to:", SOCKET_SERVER_URL);
+        
+          const socketIn = io(SOCKET_SERVER_URL);
+    // const socketIn=setTheSocket()
+    console.log(socketIn);
+    
+    setSocket(socketIn);
+    socketIn.on("connect", () => {
+      console.log("Socket connected", socketIn.id);
     });
-    setSocket(socketInstance);
 
-    socketInstance.emit("setName", name);
+    socketIn.on("connect_error", (error) => {
+      console.error("Socket connect error:", error);
+    });
 
-    socketInstance.on("allUser", (data:{name:string,id:string}[]) => {
-      // console.log(socketInstance.id);
+    socketIn.emit("setName", name);
+
+    socketIn.on("allUser", (data:{name:string,id:string}[]) => {
+      // console.log(socketIn.id);
       
-      setAllUser(data.filter(e=>e.id!==socketInstance.id));
+      setAllUser(data.filter(e=>e.id!==socketIn.id));
     });
 
     // Listen for offer
-    socketInstance.on("offer", async (data) => {
+    socketIn.on("offer", async (data) => {
       if(confirm(`${data.receiverName} is calling`)){
       console.log("Received offer, sending answer...");
       const pc = new RTCPeerConnection();
       pcRef.current = pc;
       
-  const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+  const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true})
       pc.addTrack(stream.getVideoTracks()[0])
        pc.ontrack = (event) => {
           // console.log("Remote track event:", event);
@@ -59,22 +71,22 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
         await pc.setRemoteDescription(data.offer);
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-        socketInstance.emit("answer", { offer: answer, receiverId: data.from });
+        socketIn.emit("answer", { offer: answer, receiverId: data.from });
       
       setReceiver(data.from);
 
       pc.onicecandidate = (event) => { 
         
         if (event.candidate) {
-          socketInstance.emit("iceCandidate", { candidate: event.candidate, receiver: data.from });
+          socketIn.emit("iceCandidate", { candidate: event.candidate, receiver: data.from });
         }
       };
-       socketInstance.on("iceCandidate", (data) => {
+       socketIn.on("iceCandidate", (data) => {
           pcRef.current?.addIceCandidate(data.candidate);
         
       });}
     });
-    socketInstance.on("endCall",()=>{
+    socketIn.on("endCall",()=>{
       pcRef.current?.close()
       pcRef.current=null
 
@@ -89,7 +101,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
 
     // Cleanup on unmount
     return () => {
-      socketInstance.disconnect();
+      socketIn.disconnect();
       if (pcRef.current) {
         pcRef.current.close();
       }
@@ -111,7 +123,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
   async function handleCall() {
     if (!socket) return;
     const pc = new RTCPeerConnection();
-      const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+      const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true})
 
 
       pc.onicecandidate=(event)=>{
@@ -155,6 +167,8 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     pcRef.current?.close()
     pcRef.current=null
     setReceiverName(null)
+    console.log("receiver after cut --------: ",receiverName);
+    
  if (remoteVideoRef.current) {
     remoteVideoRef.current.srcObject = null;
   }
@@ -224,6 +238,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     <Button
       onClick={handleCall}
       className={`${receiver && !connect ? "" : "hidden"} bg-green-500 hover:bg-green-600`}
+      
     >
       Call
     </Button>
@@ -249,4 +264,5 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
   );
 };
 
-export default CallBox;
+
+export default CallBox
