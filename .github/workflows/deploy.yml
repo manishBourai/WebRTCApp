@@ -37,7 +37,7 @@ jobs:
              cd backend
             pnpm install --frozen-lockfile
             npx tsc -b 
-            pm2 restart server || pm2 satrt ./dist/index.js --name server
+            pm2 restart server || pm2 start ./dist/index.js --name server
 
             echo "Building frontend..."
             cd ../frontend
@@ -47,7 +47,7 @@ jobs:
             sudo mkdir -p /var/www/frontend
             sudo rm -rf /var/www/frontend/dist
             sudo cp -r dist /var/www/frontend/
-            pm2 satrt ./var/www/frontend/dist/index.html --name client
+            pm2 start ./var/www/frontend/dist/index.html --name client
 
             sudo chown -R www-data:www-data /var/www/frontend
             sudo chmod -R 755 /var/www/frontend
