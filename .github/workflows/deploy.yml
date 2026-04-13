@@ -26,7 +26,6 @@ jobs:
             # Load nvm & node
             export NVM_DIR="\$HOME/.nvm"
             [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
-            nvm use 22
 
             cd ${{ secrets.APP_DIR }}
 
