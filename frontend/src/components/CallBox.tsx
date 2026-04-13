@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
-import { io, Socket } from "socket.io-client";
+import {  Socket } from "socket.io-client";
 import Sender from "@/utils/Sender";
 import { getSocket } from "@/store/socket";
 
@@ -9,7 +9,7 @@ import { getSocket } from "@/store/socket";
   const myVideo = useRef<HTMLVideoElement | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
-const {setAllUser,receiver,setReceiver,name,connect,setConnection,receiverName,setReceiverName,setSocketIn}=Sender()
+const {setAllUser,receiver,setReceiver,name,connect,setConnection,receiverName,setReceiverName}=Sender()
 const remoteVideoRef=useRef<HTMLVideoElement>(null)
 
 
@@ -26,17 +26,13 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
         myVideo.current.srcObject = stream;
       }
     });
-    const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || "http://localhost:8000";
-        console.log("Connecting socket to:", SOCKET_SERVER_URL);
-        
-          const socketIn = io(SOCKET_SERVER_URL);
-    // const socketIn=setTheSocket()
-    console.log(socketIn);
-    
+  
+    const socketIn=setTheSocket()
+    socketIn.connect()
     setSocket(socketIn);
-    socketIn.on("connect", () => {
-      console.log("Socket connected", socketIn.id);
-    });
+    // socketIn.on("connect", () => {
+    //   // console.log("Socket connected", socketIn.id);
+    // });
 
     socketIn.on("connect_error", (error) => {
       console.error("Socket connect error:", error);
@@ -45,7 +41,6 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     socketIn.emit("setName", name);
 
     socketIn.on("allUser", (data:{name:string,id:string}[]) => {
-      // console.log(socketIn.id);
       
       setAllUser(data.filter(e=>e.id!==socketIn.id));
     });
@@ -89,7 +84,8 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     socketIn.on("endCall",()=>{
       pcRef.current?.close()
       pcRef.current=null
-
+      setReceiver(null);
+    setReceiverName(null);
       if (remoteVideoRef.current) {
     remoteVideoRef.current.srcObject = null;
   }

@@ -1,16 +1,19 @@
 // socket.ts
 import { io, Socket } from "socket.io-client";
 
-let socket:Socket;
+let socket: Socket | null = null;
 
 export const getSocket = () => {
+  const SOCKET_SERVER_URL =
+    import.meta.env.VITE_SOCKET_SERVER_URL || "http://localhost:8000";
+
   if (!socket) {
-     const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || "http://localhost:8000";
-    console.log("Connecting socket to:", SOCKET_SERVER_URL);
-    
-      socket = io(SOCKET_SERVER_URL,{
-         transports: ["websocket"],
-      });
+    // console.log("Creating new socket connection...");
+
+    socket = io(SOCKET_SERVER_URL, {
+      transports: ["websocket"],
+    });
   }
+
   return socket;
 };

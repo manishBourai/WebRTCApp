@@ -7,7 +7,7 @@ type sender = {
     receiver:string|null
     allUser: {name:string,id:string}[] | null
     setAllUser: (value:{name:string,id:string}[]) => void
-    setReceiver: (value: string)=> void
+    setReceiver: (value: string|null)=> void
     setName:(value:string)=>void
     connect:boolean
     setConnection:(value:boolean)=>void
@@ -27,7 +27,7 @@ const Sender=create<sender>((set)=>({
  setAllUser:(value:{name:string,id:string}[])=>{
     set({allUser:value})
  },
- setReceiver:(value:string)=>{
+ setReceiver:(value)=>{
     set({receiver:value})
  },
  setName:(value)=>{
