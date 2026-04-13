@@ -36,7 +36,7 @@ jobs:
             echo "Backend setup..."
              cd backend
             pnpm install --frozen-lockfile
-            pm2 restart server || pm2 start index.js --name server
+            pm2 restart server || pnpn dev --name server
 
             echo "Building frontend..."
             cd ../frontend
