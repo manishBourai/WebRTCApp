@@ -41,13 +41,13 @@ jobs:
 
             echo "Building frontend..."
             cd ../frontend
-            pnpm install
             pnpm build
 
             echo "Deploying frontend to nginx..."
             sudo mkdir -p /var/www/frontend
             sudo rm -rf /var/www/frontend/dist
             sudo cp -r dist /var/www/frontend/
+            pm2 restart client || pm2 satrt /var/www/frontend/dist/index.html --name client
 
             sudo chown -R www-data:www-data /var/www/frontend
             sudo chmod -R 755 /var/www/frontend
