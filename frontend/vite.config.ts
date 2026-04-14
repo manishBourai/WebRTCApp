@@ -11,4 +11,11 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+   server: {
+    host: true, // allow external access
+    allowedHosts: [
+      "ec2-100-26-135-157.compute-1.amazonaws.com"
+    ]
+  }
+  
 })
