@@ -42,8 +42,7 @@ jobs:
             echo "Building frontend..."
             cd ../frontend
             pnpm build
-            pm2 start pnpm --name client -- dev
-
+            
             echo "Deploying frontend to nginx..."
             sudo mkdir -p /var/www/frontend
             sudo rm -rf /var/www/frontend/dist
