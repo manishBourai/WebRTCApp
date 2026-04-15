@@ -326,7 +326,7 @@ const CallBox = () => {
 
   return (
     <section className="relative flex min-h-[calc(100vh-340px)] flex-col p-3 sm:min-h-[calc(100vh-360px)] sm:p-4 lg:min-h-screen lg:p-6">
-      <div className="relative flex min-h-[65vh] flex-1 overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-[0_30px_120px_rgba(15,23,42,0.45)]">
+      <div className="relative flex min-h-[65vh] flex-1 overflow-hidden rounded-[2rem] bg-card shadow-[0_24px_80px_rgba(15,23,42,0.08)] ring-1 ring-border dark:bg-surface">
         <video
           ref={remoteVideoRef}
           autoPlay
@@ -342,26 +342,26 @@ const CallBox = () => {
           muted
           className={`transition-all duration-300 ease-in-out ${
             connect
-              ? "absolute right-3 top-3 z-10 h-28 w-24 rounded-[1.5rem] border border-white/20 object-cover sm:h-40 sm:w-32 lg:right-6 lg:top-6 lg:h-48 lg:w-40"
+              ? "absolute right-3 top-3 z-10 h-28 w-24 rounded-[1.5rem] border border-border object-cover shadow-lg sm:h-40 sm:w-32 lg:right-6 lg:top-6 lg:h-48 lg:w-40"
               : "h-full w-full object-cover"
           }`}
           style={{ transform: "scaleX(-1)" }}
         />
 
         {!connect && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(180deg,rgba(2,6,23,0.28),rgba(2,6,23,0.72))] p-6">
+          <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(180deg,rgba(248,250,252,0.4),rgba(248,250,252,0.85))] p-6 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.36),rgba(15,23,42,0.88))]">
             <div className="max-w-md text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-300/10">
-                <VideoCameraIcon className=" w-8 text-cyan-200" />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-500 ring-1 ring-cyan-500/20 dark:text-cyan-300">
+                <VideoCameraIcon className="w-8" />
               </div>
-              <h2 className="mt-5 text-2xl font-semibold text-white sm:text-3xl">
+              <h2 className="mt-5 text-2xl font-semibold text-foreground sm:text-3xl">
                 {waitingTitle}
               </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-300 sm:text-base">
+              <p className="mt-3 text-sm leading-6 text-secondary sm:text-base">
                 {waitingText}
               </p>
               {errorMessage && (
-                <p className="mt-4 rounded-full bg-rose-400/10 px-4 py-2 text-sm text-rose-200">
+                <p className="mt-4 rounded-full bg-rose-500/10 px-4 py-2 text-sm text-rose-400">
                   {errorMessage}
                 </p>
               )}
@@ -370,7 +370,7 @@ const CallBox = () => {
         )}
 
         {connect && receiverName && (
-          <div className="absolute left-4 top-4 z-10 rounded-full bg-black/40 px-4 py-2 text-sm text-white backdrop-blur">
+          <div className="absolute left-4 top-4 z-10 rounded-full bg-card/90 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur dark:bg-surface/80">
             Live with {receiverName}
           </div>
         )}
@@ -379,7 +379,7 @@ const CallBox = () => {
       <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
         <Button
           onClick={handleCall}
-          className={`${canCall ? "" : "hidden"} h-11 rounded-full bg-emerald-500 px-6 text-white hover:bg-emerald-600`}
+          className={`${canCall ? "" : "hidden"} h-11 rounded-[1.5rem] bg-accent text-accent-foreground px-6 shadow-sm hover:bg-accent/90`}
         >
           <PhoneIcon className="size-4" />
           Start call
@@ -389,7 +389,7 @@ const CallBox = () => {
           variant="destructive"
           size="default"
           onClick={handleCut}
-          className={`${connect ? "" : "hidden"} h-11 rounded-full px-6`}
+          className={`${connect ? "" : "hidden"} h-11 rounded-[1.5rem] px-6`}
         >
           <PhoneXMarkIcon className="size-4" />
           End call
