@@ -4,200 +4,208 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Sender from "@/utils/Sender";
 import { motion } from "framer-motion";
-import { VideoCameraIcon } from "@heroicons/react/24/outline";
+import { PhoneIcon, UserGroupIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 
-// Features for the section below hero
-const features = [
-  {
-    icon: <VideoCameraIcon className="h-8 w-8 text-indigo-500" />,
-    title: "High-Quality Calls",
-    description: "Crystal clear audio and video with adaptive streaming.",
-  },
-  {
-    icon: <VideoCameraIcon className="h-8 w-8 text-green-500" />,
-    title: "No Sign-Up Required",
-    description: "Jump into meetings instantly—no hassles, no accounts needed.",
-  },
-  {
-    icon: <VideoCameraIcon className="h-8 w-8 text-pink-500" />,
-    title: "Multi-Device Ready",
-    description: "Works smoothly across desktop, tablet, and mobile.",
-  },
-];
-
-// Footer links
-const footerLinks = [
-  { label: "Privacy Policy", url: "#" },
-  { label: "Terms of Service", url: "#" },
-  { label: "Contact", url: "#" },
-];
-
-const LandingPage = () => {
+const HomePage = () => {
   const navigate = useNavigate();
-  const [name, setMyName] = useState<string>("");
-  const [room, setRoom] = useState<string>("");
-  const { setName } = Sender();
+  const [directName, setDirectName] = useState("");
+  const [roomName, setRoomName] = useState("");
+  const [roomUserName, setRoomUserName] = useState("");
+  const { setName, setRoomId, setMode, resetSession } = Sender();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const joinLobby = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name) {
-      setName(name);
-      navigate(room ? `/room/${room}` : "/dashboard");
-    }
+
+    const trimmedName = directName.trim();
+    if (!trimmedName) return;
+
+    resetSession();
+    setName(trimmedName);
+    setMode("lobby");
+    navigate("/dashboard");
+  };
+
+  const joinRoom = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const trimmedName = roomUserName.trim();
+    const trimmedRoom = roomName.trim().toLowerCase();
+    if (!trimmedName || !trimmedRoom) return;
+
+    resetSession();
+    setName(trimmedName);
+    setMode("room");
+    setRoomId(trimmedRoom);
+    navigate("/dashboard");
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-tr from-blue-50 via-indigo-100 to-purple-50">
-      {/* GLASSY ANIMATED HEADER */}
-      <motion.header
-        initial={{ opacity: 0, y: -36 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, type: "spring" }}
-        className="sticky top-0 z-40 w-full bg-white/60 backdrop-blur-lg shadow-sm border-b border-indigo-100"
-      >
-        <div className="max-w-6xl mx-auto flex items-center gap-3 py-4 px-6">
-          <VideoCameraIcon className="h-9 w-9 text-indigo-600" />
-          <span className="font-black text-2xl text-indigo-700 tracking-tight drop-shadow">Connectly</span>
-          <motion.span
-            className="ml-3 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-600 shadow"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6, type: "spring" }}
-          >
-            Effortless video calls
-          </motion.span>
-        </div>
-      </motion.header>
-
-      {/* HERO SECTION */}
-      <motion.section 
-        id="hero-form"
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, type: "spring" }}
-        className="w-full flex flex-col items-center mt-16"
-      >
-        <motion.div
-          initial={{ scale: 0.92 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="bg-white/90 backdrop-blur-xl rounded-xl shadow-2xl px-10 py-9 max-w-lg text-center border mb-10"
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.18),_transparent_26%),radial-gradient(circle_at_bottom,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(145deg,_#020617_0%,_#0f172a_55%,_#111827_100%)] px-4 py-8 text-white sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col gap-10">
+        <motion.header
+          initial={{ opacity: 0, y: -24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
         >
-          <div className="flex justify-center mb-4">
-            <VideoCameraIcon className="h-12 w-12 text-indigo-600 animate-pulse" />
-          </div>
-          <h1 className="text-4xl font-extrabold mb-3 text-gray-900">Connectly Video Calls</h1>
-          <p className="text-gray-700 text-lg mb-7">
-            Connect face-to-face, instantly.<br/>
-            <span className="bg-indigo-100 rounded px-2 py-0.5 text-indigo-600 font-medium">No downloads or signups required.</span>
-          </p>
-          <form className="flex flex-col gap-3 items-center" onSubmit={handleSubmit}>
-            <Input 
-              className="bg-white focus:ring-2 focus:ring-indigo-300 transition w-60"
-              type="text"
-              placeholder="Your Name"
-              value={name}
-              onChange={e => setMyName(e.target.value)}
-              required
-            />
-            <Input 
-              className="bg-white focus:ring-2 focus:ring-pink-300 transition w-60"
-              type="text"
-              placeholder="Room Name (optional)"
-              value={room}
-              onChange={e => setRoom(e.target.value)}
-            />
-            <motion.div
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full"
-            >
-              <Button
-                type="submit"
-                variant="default"
-                className="w-full bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow"
-              >
-                {room ? "Join Room" : "Explore Dashboard"}
-              </Button>
-            </motion.div>
-          </form>
-        </motion.div>
-      </motion.section>
-
-      {/* FEATURES SECTION */}
-      <motion.section
-        id="features"
-        className="max-w-4xl w-full mx-auto mb-10 px-4"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          visible: { transition: { staggerChildren: 0.15 } },
-        }}
-      >
-        <div className="grid md:grid-cols-3 gap-6">
-          {features.map((feature) => (
-            <motion.div
-              key={feature.title}
-              variants={{
-                hidden: { opacity: 0, y: 48 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ duration: 0.7, type: "spring", stiffness: 90 }}
-              className="bg-white/80 border rounded-lg flex flex-col items-center p-6 shadow hover:shadow-lg hover:-translate-y-1 transition"
-            >
-              <div className="mb-3">{feature.icon}</div>
-              <div className="text-lg font-bold mb-2 text-gray-900">{feature.title}</div>
-              <div className="text-gray-500 mb-1">{feature.description}</div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      <div className="flex-grow" />
-      {/* FOOTER */}
-      <motion.footer
-        id="footer"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, delay: 0.7, type: "spring" }}
-        className="w-full text-gray-700 bg-gradient-to-tr from-indigo-100 via-white to-purple-100 border-t border-indigo-200"
-      >
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:justify-between items-center gap-5 py-8 px-4">
           <div className="flex items-center gap-3">
-            <VideoCameraIcon className="h-8 w-8 text-indigo-500" />
-            <span className="font-bold text-lg text-indigo-700 tracking-wide">Connectly</span>
-            <span className="ml-2 text-xs italic text-gray-400">— Effortless video calls</span>
+            <div className="rounded-2xl border border-cyan-400/20 bg-cyan-300/10 p-3">
+              <VideoCameraIcon className="h-8 w-8 text-cyan-200" />
+            </div>
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-cyan-300/80">
+                Video calling
+              </p>
+              <h1 className="text-2xl font-semibold sm:text-3xl">Connectly</h1>
+            </div>
           </div>
-          <nav className="flex gap-7">
-            {footerLinks.map(link => (
-              <a
-                key={link.label}
-                href={link.url}
-                className="text-gray-700 hover:text-indigo-600 transition underline-offset-2 underline decoration-indigo-300"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-        <div className="text-xs text-gray-400 text-center pb-2">© {new Date().getFullYear()} Connectly. All rights reserved.</div>
-      </motion.footer>
+          <p className="max-w-xl text-sm text-slate-300 sm:text-right">
+            Choose between a direct ready-to-call user list or a private room that only two people can join.
+          </p>
+        </motion.header>
 
-      {/* Animated BG keyframe */}
-      <style>
-        {`
-        .bg-gradient-to-tr {
-          background-size: 200% 200%;
-          animation: bgslide 16s ease-in-out infinite;
-        }
-        @keyframes bgslide {
-          0%,100% { background-position: 0% 70%; }
-          50% { background-position: 100% 20%; }
-        }
-        `}
-      </style>
+        <div className="grid gap-8 xl:grid-cols-[1fr_1fr_0.9fr]">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="rounded-[2rem] border border-white/10 bg-white/10 p-5 shadow-[0_30px_120px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-8"
+          >
+            <div className="rounded-[1.5rem] border border-cyan-400/20 bg-slate-950/75 p-5 sm:p-6">
+              <div className="flex items-start gap-3">
+                <div className="rounded-2xl bg-cyan-400/10 p-3">
+                  <PhoneIcon className="h-6 w-6 text-cyan-200" />
+                </div>
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-cyan-300/80">
+                    Direct call
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold">Join the ready list</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">
+                    Enter your name and appear in the sidebar so another user can call you directly.
+                  </p>
+                </div>
+              </div>
+
+              <form className="mt-6 space-y-4" onSubmit={joinLobby}>
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300" htmlFor="direct-name">
+                    Your name
+                  </label>
+                  <Input
+                    id="direct-name"
+                    className="h-12 border-white/10 bg-white/5 text-white placeholder:text-slate-500"
+                    type="text"
+                    placeholder="Enter your name"
+                    value={directName}
+                    onChange={(e) => setDirectName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="h-12 w-full bg-cyan-400 text-slate-950 hover:bg-cyan-300"
+                >
+                  Ready to call
+                </Button>
+              </form>
+            </div>
+          </motion.section>
+
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="rounded-[2rem] border border-white/10 bg-white/10 p-5 shadow-[0_30px_120px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-8"
+          >
+            <div className="rounded-[1.5rem] border border-cyan-400/20 bg-slate-950/75 p-5 sm:p-6">
+              <div className="flex items-start gap-3">
+                <div className="rounded-2xl bg-cyan-400/10 p-3">
+                  <UserGroupIcon className="h-6 w-6 text-cyan-200" />
+                </div>
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-cyan-300/80">
+                    Room call
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold">Create or join a room</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">
+                    Use the same room name on two devices. Only two people can enter that room.
+                  </p>
+                </div>
+              </div>
+
+              <form className="mt-6 space-y-4" onSubmit={joinRoom}>
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300" htmlFor="room-user-name">
+                    Your name
+                  </label>
+                  <Input
+                    id="room-user-name"
+                    className="h-12 border-white/10 bg-white/5 text-white placeholder:text-slate-500"
+                    type="text"
+                    placeholder="Enter your name"
+                    value={roomUserName}
+                    onChange={(e) => setRoomUserName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300" htmlFor="room-name">
+                    Room name
+                  </label>
+                  <Input
+                    id="room-name"
+                    className="h-12 border-white/10 bg-white/5 text-white placeholder:text-slate-500"
+                    type="text"
+                    placeholder="example: team-call"
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="h-12 w-full bg-cyan-400 text-slate-950 hover:bg-cyan-300"
+                >
+                  Join room
+                </Button>
+              </form>
+            </div>
+          </motion.section>
+
+          <motion.section
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="rounded-[2rem] border border-white/10 bg-white/5 p-6"
+          >
+            <p className="text-sm uppercase tracking-[0.24em] text-cyan-300/80">
+              How it works
+            </p>
+            <div className="mt-4 space-y-4">
+              <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4">
+                <p className="text-sm text-slate-400">Option 1</p>
+                <p className="mt-2 text-lg font-medium">Sidebar direct calling</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Users enter a name, appear in the ready list, and can call each other directly from the sidebar.
+                </p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4">
+                <p className="text-sm text-slate-400">Option 2</p>
+                <p className="mt-2 text-lg font-medium">Private room</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Users share a room name and only two people can join that room before starting the call.
+                </p>
+              </div>
+            </div>
+          </motion.section>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default LandingPage;
+export default HomePage;

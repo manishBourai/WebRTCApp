@@ -1,61 +1,66 @@
-import {create} from "zustand"
-import {  io, Socket } from "socket.io-client"
+import { create } from "zustand";
 
-type sender = {
-    mySocket: Socket | null
-    name: string | null
-    receiver:string|null
-    allUser: {name:string,id:string}[] | null
-    setAllUser: (value:{name:string,id:string}[]) => void
-    setReceiver: (value: string|null)=> void
-    setName:(value:string)=>void
-    connect:boolean
-    setConnection:(value:boolean)=>void
-    receiverName:string|null
-    setReceiverName:(value:string|null)=>void
-    setSocketIn:()=>void
+type UserItem = {
+  id: string;
+  name: string;
+};
 
-}
-const Sender=create<sender>((set)=>({
- mySocket:null,
- name:null,
- allUser:null,
- receiver:null,
- connect:false,
- receiverName:null,
+type RoomStatus = "idle" | "waiting" | "ready" | "full";
+type SessionMode = "lobby" | "room";
 
- setAllUser:(value:{name:string,id:string}[])=>{
-    set({allUser:value})
- },
- setReceiver:(value)=>{
-    set({receiver:value})
- },
- setName:(value)=>{
-   set({name:value})
- },
- setConnection:(value)=>{
-   set({connect:value})
- },
- setReceiverName:(value)=>{
-   console.log(value);
-   
-   set({receiverName:value})
- },
- setSocketIn:async()=>{
-  let socket
-  if (!socket) {
-     const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || "http://localhost:8000";
-    console.log("Connecting socket to:", SOCKET_SERVER_URL);
-    
-      socket = io(SOCKET_SERVER_URL,{
-         transports: ["websocket"],
-      });
-  }
-  set({mySocket:socket})
- }
- 
- 
-}))
+type SenderStore = {
+  name: string | null;
+  mode: SessionMode | null;
+  onlineUsers: UserItem[];
+  roomId: string;
+  roomUsers: UserItem[];
+  receiver: string | null;
+  receiverName: string | null;
+  connect: boolean;
+  roomStatus: RoomStatus;
+  setName: (value: string) => void;
+  setMode: (value: SessionMode | null) => void;
+  setOnlineUsers: (value: UserItem[]) => void;
+  setRoomId: (value: string) => void;
+  setRoomUsers: (value: UserItem[]) => void;
+  setReceiver: (value: string | null) => void;
+  setReceiverName: (value: string | null) => void;
+  setConnection: (value: boolean) => void;
+  setRoomStatus: (value: RoomStatus) => void;
+  resetSession: () => void;
+};
 
+const Sender = create<SenderStore>((set) => ({
+  name: null,
+  mode: null,
+  onlineUsers: [],
+  roomId: "",
+  roomUsers: [],
+  receiver: null,
+  receiverName: null,
+  connect: false,
+  roomStatus: "idle",
 
-export default Sender
+  setName: (value) => set({ name: value }),
+  setMode: (value) => set({ mode: value }),
+  setOnlineUsers: (value) => set({ onlineUsers: value }),
+  setRoomId: (value) => set({ roomId: value }),
+  setRoomUsers: (value) => set({ roomUsers: value }),
+  setReceiver: (value) => set({ receiver: value }),
+  setReceiverName: (value) => set({ receiverName: value }),
+  setConnection: (value) => set({ connect: value }),
+  setRoomStatus: (value) => set({ roomStatus: value }),
+  resetSession: () =>
+    set({
+      mode: null,
+      onlineUsers: [],
+      roomId: "",
+      roomUsers: [],
+      receiver: null,
+      receiverName: null,
+      connect: false,
+      roomStatus: "idle",
+    }),
+}));
+
+export default Sender;
