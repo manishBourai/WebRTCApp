@@ -1,4 +1,4 @@
-import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { Moon, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface ThemeToggleProps {
@@ -12,13 +12,14 @@ const ThemeToggle = ({ theme, onToggle }: ThemeToggleProps) => {
       variant="outline"
       size="icon"
       onClick={onToggle}
-      className="rounded-2xl border border-border bg-card/80 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-card/95 dark:bg-surface/80 dark:hover:bg-surface/90"
+      className="h-9 w-9 rounded-[8px] border-border bg-transparent text-secondary shadow-none hover:bg-elevated hover:text-foreground"
       aria-label="Toggle theme"
+      title={`Switch to ${theme === "dark" ? "light" : "dark"} appearance`}
     >
       {theme === "dark" ? (
-        <SunIcon className="h-5 w-5" />
+        <Sun className="size-4" />
       ) : (
-        <MoonIcon className="h-5 w-5" />
+        <Moon className="size-4" />
       )}
     </Button>
   );

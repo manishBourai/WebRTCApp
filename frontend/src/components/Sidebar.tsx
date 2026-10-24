@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
-import { Button } from "./ui/button";
+import { useState } from "react";
+import { Check, Copy, DoorOpen, UsersRound } from "lucide-react";
 
 interface SidebarProps {
   user: string;
@@ -13,16 +12,7 @@ interface SidebarProps {
   onSelectUser: (id: string, name: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  user,
-  mode,
-  roomId,
-  roomUsers,
-  onlineUsers,
-  roomStatus,
-  selectedUserId,
-  onSelectUser,
-}) => {
+const Sidebar = ({ user, mode, roomId, roomUsers, onlineUsers, roomStatus, selectedUserId, onSelectUser }: SidebarProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -35,117 +25,62 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const statusLabel =
-    roomStatus === "ready"
-      ? "Two people are in this room"
-      : roomStatus === "full"
-        ? "Room is full"
-        : "Waiting for one more person";
+  const status = roomStatus === "ready" ? "2 people in room" : roomStatus === "full" ? "Room is full" : "Waiting for one more";
 
   return (
-    <aside className="w-full bg-card/90 ring-1 ring-border backdrop-blur-xl shadow-sm dark:bg-surface/95 lg:min-h-screen lg:w-[360px]">
-      <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
-        <div className="flex items-center gap-4">
-          <UserCircleIcon className="h-12 w-12 text-indigo-500" />
-          <div>
-            <p className="text-sm text-secondary">You joined as</p>
-            <h2 className="text-xl font-semibold text-foreground">{user}</h2>
+    <aside className="flex h-full flex-col bg-background text-foreground">
+      <div className="border-b border-border p-5">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">Your profile</p>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="flex size-9 items-center justify-center rounded-full bg-elevated text-sm font-semibold text-accent">{user.slice(0, 1).toUpperCase()}</span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{user}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">In {mode === "lobby" ? "ready list" : "a private room"}</p>
           </div>
         </div>
-
-        {mode === "room" ? (
-          <>
-            <div className="rounded-3xl bg-card/85 p-4 ring-1 ring-border shadow-sm dark:bg-surface/90">
-              <p className="text-sm uppercase tracking-[0.24em] text-secondary/80">Room Name</p>
-              <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="break-all text-2xl font-semibold text-foreground">{roomId}</p>
-                <Button
-                  variant="outline"
-                  className="border-border bg-muted/20 text-foreground hover:bg-muted/30"
-                  onClick={handleCopy}
-                >
-                  {copied ? "Copied" : "Copy room"}
-                </Button>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-secondary">
-                Share this room name with one other person so they can join the same call.
-              </p>
-            </div>
-
-            <div className="rounded-3xl bg-card/85 p-4 ring-1 ring-border shadow-sm dark:bg-surface/90">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold text-foreground">Room status</h3>
-                <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-medium text-emerald-300">
-                  {statusLabel}
-                </span>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                {roomUsers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between rounded-2xl bg-muted/30 px-4 py-3 dark:bg-muted/20"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">{member.name}</p>
-                      <p className="text-sm text-secondary">
-                        {member.name === user ? "This is you" : "Connected user"}
-                      </p>
-                    </div>
-                    <span className="h-3 w-3 rounded-full bg-emerald-400" />
-                  </div>
-                ))}
-
-                {roomUsers.length < 2 && (
-                  <div className="rounded-2xl border border-dashed border-border px-4 py-5 text-sm text-secondary">
-                    One more user can join this room.
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="rounded-3xl bg-card/85 p-4 ring-1 ring-border shadow-sm dark:bg-surface/90">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Ready users</h3>
-                <p className="text-sm text-secondary">
-                  Choose someone from the sidebar and start the call.
-                </p>
-              </div>
-              <span className="rounded-full bg-cyan-500/15 px-3 py-1 text-xs font-medium text-cyan-400">
-                {onlineUsers.length} online
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {onlineUsers.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-border px-4 py-5 text-sm text-secondary">
-                  No other users are ready yet.
-                </div>
-              )}
-
-              {onlineUsers.map((member) => (
-                <button
-                  key={member.id}
-                  onClick={() => onSelectUser(member.id, member.name)}
-                  className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition duration-200 ${
-                    selectedUserId === member.id
-                      ? "bg-cyan-500/10 text-foreground"
-                      : "bg-muted/30 text-foreground hover:bg-muted/40"
-                  }`}
-                >
-                  <div>
-                    <p className="font-medium text-foreground">{member.name}</p>
-                    <p className="text-sm text-secondary">Tap to call</p>
-                  </div>
-                  <span className="h-3 w-3 rounded-full bg-emerald-400" />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {mode === "room" ? (
+        <div className="p-5">
+          <div className="flex items-center gap-2 text-sm font-medium"><DoorOpen size={16} className="text-accent" /> Private room</div>
+          <p className="mt-3 break-all font-mono text-sm text-foreground">{roomId}</p>
+          <button type="button" onClick={handleCopy} className="mt-3 inline-flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-xs font-medium text-secondary transition hover:bg-elevated hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-live="polite">
+            {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
+            {copied ? "Copied" : "Copy room name"}
+          </button>
+          <div className="my-5 h-px bg-border" />
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-medium">Participants</h2>
+            <span className="text-xs text-muted-foreground">{roomUsers.length}/2</span>
+          </div>
+          <ul className="mt-3 space-y-1">
+            {roomUsers.map((member) => <li key={member.id} className="flex items-center gap-2.5 rounded-[8px] px-2.5 py-2 text-sm"><span className="size-1.5 rounded-full bg-success" />{member.name}<span className="ml-auto text-xs text-muted-foreground">{member.name === user ? "You" : "Here"}</span></li>)}
+          </ul>
+          {roomUsers.length < 2 && <p className="mt-3 rounded-[8px] bg-elevated px-3 py-2.5 text-xs leading-5 text-secondary">Share the room name to invite one other person.</p>}
+          <p className={`mt-4 text-xs ${roomStatus === "full" ? "text-error" : roomStatus === "ready" ? "text-success" : "text-secondary"}`}>{status}</p>
+        </div>
+      ) : (
+        <div className="flex min-h-0 flex-1 flex-col p-5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm font-medium"><UsersRound size={16} className="text-accent" /> Ready people</div>
+            <span className="text-xs tabular-nums text-muted-foreground">{onlineUsers.length}</span>
+          </div>
+          {onlineUsers.length === 0 ? (
+            <div className="mt-4 rounded-[9px] border border-dashed border-border px-3.5 py-4">
+              <p className="text-sm text-foreground">You’re all set.</p>
+              <p className="mt-1.5 text-xs leading-5 text-secondary">We’ll show people here as they join. Keep this page open to receive a call.</p>
+            </div>
+          ) : (
+            <ul className="mt-3 space-y-1 overflow-y-auto">
+              {onlineUsers.map((member) => {
+                const selected = selectedUserId === member.id;
+                return <li key={member.id}><button type="button" onClick={() => onSelectUser(member.id, member.name)} aria-pressed={selected} className={`flex min-h-11 w-full items-center gap-3 rounded-[8px] px-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "bg-elevated text-foreground" : "text-secondary hover:bg-elevated hover:text-foreground"}`}><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface text-xs font-medium text-foreground">{member.name.slice(0, 1).toUpperCase()}</span><span className="min-w-0 flex-1 truncate">{member.name}</span><span className="size-1.5 shrink-0 rounded-full bg-success" /></button></li>;
+              })}
+            </ul>
+          )}
+          {selectedUserId && <p className="mt-4 text-xs leading-5 text-secondary">Selected person is ready for a one-to-one call.</p>}
+        </div>
+      )}
     </aside>
   );
 };

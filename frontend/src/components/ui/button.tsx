@@ -5,16 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold transition duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[9px] text-sm font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_18px_45px_rgba(99,102,241,0.18)] hover:bg-primary/95 active:scale-[0.98]",
+          "bg-primary text-primary-foreground hover:bg-accent-hover",
         destructive:
-          "bg-destructive text-white shadow-[0_18px_35px_rgba(239,68,68,0.18)] hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-border bg-card/80 text-foreground shadow-sm hover:bg-card/95 dark:bg-surface/80 dark:text-foreground dark:hover:bg-surface/90",
+          "border border-border bg-transparent text-foreground shadow-none hover:bg-muted",
         secondary:
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/90",
         ghost:
@@ -24,8 +24,8 @@ const buttonVariants = cva(
       size: {
         default: "h-11 px-5 py-2.5 has-[>svg]:px-3",
         sm: "h-9 rounded-xl gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-12 rounded-[1.5rem] px-6 has-[>svg]:px-4",
-        icon: "h-11 w-11 rounded-2xl p-0",
+        lg: "h-12 rounded-[9px] px-6 has-[>svg]:px-4",
+        icon: "h-10 w-10 rounded-[8px] p-0",
       },
     },
     defaultVariants: {
@@ -56,4 +56,5 @@ function Button({
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants }
