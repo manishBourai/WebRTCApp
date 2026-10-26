@@ -29,12 +29,17 @@ const HomePage = () => {
     event.preventDefault();
     const name = roomUserName.trim();
     const room = roomName.trim().toLowerCase();
-    if (!name || !room) return;
+    if (!name || !/^[a-f0-9]{32}$/.test(room)) return;
     resetSession();
     setName(name);
     setMode("room");
     setRoomId(room);
     navigate("/dashboard");
+  };
+
+  const createRoomCode = () => {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    setRoomName(Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(""));
   };
 
   return (
@@ -101,7 +106,7 @@ const HomePage = () => {
               </span>
               <div>
                 <h2 id="private-room-title" className="text-base font-semibold text-foreground">Join a private room</h2>
-                <p className="mt-1 text-sm leading-6 text-secondary">Use the same room name to meet one other person.</p>
+                <p className="mt-1 text-sm leading-6 text-secondary">Create a secure invite code and share it privately with one person.</p>
               </div>
             </div>
             <form onSubmit={joinRoom} className="space-y-4">
@@ -110,8 +115,9 @@ const HomePage = () => {
                 <input id="room-user-name" className="h-11 w-full rounded-[9px] border border-border bg-surface px-3.5 text-sm text-foreground placeholder:text-muted-foreground" type="text" placeholder="Your name" autoComplete="name" maxLength={40} value={roomUserName} onChange={(event) => setRoomUserName(event.target.value)} required />
               </div>
               <div>
-                <label htmlFor="room-name" className="mb-2 block text-sm font-medium text-foreground">Room name</label>
-                <input id="room-name" className="h-11 w-full rounded-[9px] border border-border bg-surface px-3.5 text-sm text-foreground placeholder:text-muted-foreground" type="text" placeholder="For example, design-sync" autoComplete="off" maxLength={64} value={roomName} onChange={(event) => setRoomName(event.target.value)} required />
+                <label htmlFor="room-name" className="mb-2 block text-sm font-medium text-foreground">Secure room code</label>
+                <input id="room-name" className="h-11 w-full rounded-[9px] border border-border bg-surface px-3.5 text-sm text-foreground placeholder:text-muted-foreground" type="text" placeholder="Generate or paste a 32-character code" autoComplete="off" minLength={32} maxLength={32} pattern="[a-fA-F0-9]{32}" value={roomName} onChange={(event) => setRoomName(event.target.value)} required />
+                <button type="button" onClick={createRoomCode} className="mt-2 text-xs font-medium text-accent underline-offset-4 hover:underline">Generate a new private room code</button>
               </div>
               <button type="submit" className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[9px] border border-border bg-elevated px-4 text-sm font-medium text-foreground transition hover:border-muted-foreground/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                 Join room <ArrowRight size={15} />
