@@ -11,6 +11,6 @@ RUN npm install -g pnpm
 
 COPY . . 
 
-EXPOSE 8000
+EXPOSE 3000
 
 CMD ["pnpm","dev"]

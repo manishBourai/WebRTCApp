@@ -26,10 +26,15 @@ const CallBox = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [mediaStatus, setMediaStatus] = useState<MediaStatus>("requesting");
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
+  const [incomingCall, setIncomingCall] = useState<{ from: string; callerName: string } | null>(null);
+  const [callApproved, setCallApproved] = useState(false);
+  const [callRequested, setCallRequested] = useState(false);
   const [signalingStatus, setSignalingStatus] = useState<SignalingStatus>("connecting");
   const { name, mode, roomId, roomUsers, onlineUsers, receiver, receiverName, setReceiverName, connect, setConnection, setReceiver, setRoomUsers, setRoomStatus, setOnlineUsers } = Sender();
   const receiverRef = useRef(receiver);
   receiverRef.current = receiver;
+  const callApprovedRef = useRef(callApproved);
+  callApprovedRef.current = callApproved;
 
   useEffect(() => {
     if (mediaStatus === "ready" && localStreamRef.current && myVideo.current) {
@@ -74,13 +79,13 @@ const CallBox = () => {
     pcRef.current = null;
   };
 
-  const createPeerConnection = (activeSocket: Socket, targetReceiver: string) => {
+  const createPeerConnection = (activeSocket: Socket) => {
     cleanupPeerConnection();
     const pc = new RTCPeerConnection(rtcConfig);
     pcRef.current = pc;
     setCallStatus("connecting");
     pc.onicecandidate = (event) => {
-      if (event.candidate) activeSocket.emit("iceCandidate", { candidate: event.candidate, receiverId: targetReceiver });
+      if (event.candidate) activeSocket.emit("iceCandidate", { candidate: event.candidate });
     };
     pc.ontrack = async (event) => {
       const [remoteStream] = event.streams;
@@ -156,21 +161,39 @@ const CallBox = () => {
       });
 
       socketIn.on("roomError", (message: string) => {
+        setCallRequested(false);
         setErrorMessage(message);
         if (mode === "room") setRoomStatus(message.includes("2 people") ? "full" : "waiting");
       });
 
+      socketIn.on("incomingCall", (data: { from: string; callerName: string }) => {
+        setIncomingCall(data);
+        setCallApproved(false);
+        setCallRequested(false);
+      });
+      socketIn.on("callAccepted", (data: { peerId: string; peerName: string }) => {
+        setReceiver(data.peerId);
+        setReceiverName(data.peerName);
+        setIncomingCall(null);
+        setCallApproved(true);
+        setCallRequested(false);
+      });
+      socketIn.on("callDeclined", () => {
+        setIncomingCall(null);
+        setCallApproved(false);
+        setCallRequested(false);
+        setErrorMessage("The call request was declined or canceled.");
+      });
       socketIn.on("offer", async (data) => {
         try {
+          if (!callApprovedRef.current) return;
           const stream = await ensureLocalStream();
-          setReceiver(data.from);
-          setReceiverName(data.receiverName ?? null);
-          const pc = createPeerConnection(socketIn, data.from);
+          const pc = createPeerConnection(socketIn);
           stream.getTracks().forEach((track) => pc.addTrack(track, stream));
           await pc.setRemoteDescription(data.offer);
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
-          socketIn.emit("answer", { offer: answer, receiverId: data.from });
+          socketIn.emit("answer", { offer: answer });
         } catch (error) {
           console.error("Failed to answer call:", error);
           setErrorMessage(isPermissionError(error) ? "Allow camera and microphone access to answer this call." : "Unable to access camera or microphone for this call.");
@@ -191,6 +214,8 @@ const CallBox = () => {
         cleanupPeerConnection();
         resetRemoteVideo();
         setCallStatus("idle");
+        setCallApproved(false);
+        setCallRequested(false);
         setErrorMessage("");
       });
     };
@@ -205,6 +230,9 @@ const CallBox = () => {
       socketIn.off("roomUpdate");
       socketIn.off("roomError");
       socketIn.off("offer");
+      socketIn.off("incomingCall");
+      socketIn.off("callAccepted");
+      socketIn.off("callDeclined");
       socketIn.off("answer");
       socketIn.off("iceCandidate");
       socketIn.off("endCall");
@@ -229,13 +257,19 @@ const CallBox = () => {
       setErrorMessage("Wait for the second person to join the room.");
       return;
     }
+    if (!callApproved) {
+      socket.emit("requestCall", { receiverId: receiver });
+      setCallRequested(true);
+      setErrorMessage("Call request sent. Waiting for the other person to accept.");
+      return;
+    }
     try {
       const stream = await ensureLocalStream();
-      const pc = createPeerConnection(socket, receiver);
+      const pc = createPeerConnection(socket);
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      socket.emit("createOffer", { offer, receiverId: receiver });
+      socket.emit("createOffer", { offer });
       setErrorMessage("");
     } catch (error) {
       console.error("Failed to start call:", error);
@@ -244,7 +278,7 @@ const CallBox = () => {
   };
 
   const handleEndCall = () => {
-    socket?.emit("cutCall", receiver);
+    socket?.emit("cutCall");
     cleanupPeerConnection();
     resetRemoteVideo();
     setCallStatus("idle");
@@ -298,7 +332,12 @@ const CallBox = () => {
       </div>
 
       <div className="relative mt-4 flex min-h-14 items-center justify-center gap-2 sm:mt-5 sm:gap-3">
-        {canCall && <button type="button" onClick={handleCall} className="inline-flex h-11 items-center justify-center gap-2 rounded-[9px] bg-accent px-5 text-sm font-semibold text-accent-foreground transition hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><Phone size={16} />Start call</button>}
+        {incomingCall && <div className="flex flex-wrap items-center justify-center gap-2" role="alertdialog" aria-label="Incoming call">
+          <span className="px-2 text-sm">{incomingCall.callerName} wants to call.</span>
+          <button type="button" onClick={() => { socket?.emit("acceptCall", { callerId: incomingCall.from }); setReceiver(incomingCall.from); setReceiverName(incomingCall.callerName); }} className="inline-flex h-10 items-center gap-2 rounded-[9px] bg-accent px-4 text-sm font-semibold text-accent-foreground">Accept</button>
+          <button type="button" onClick={() => { socket?.emit("declineCall", { callerId: incomingCall.from }); setIncomingCall(null); }} className="inline-flex h-10 items-center gap-2 rounded-[9px] border border-border px-4 text-sm">Decline</button>
+        </div>}
+        {canCall && !incomingCall && <button type="button" disabled={callRequested} onClick={handleCall} className="inline-flex h-11 items-center justify-center gap-2 rounded-[9px] bg-accent px-5 text-sm font-semibold text-accent-foreground transition hover:bg-accent-hover disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><Phone size={16} />{callRequested ? "Request sent" : callApproved ? "Start call" : "Request call"}</button>}
         {(connect || callStatus === "connecting") && <button type="button" onClick={handleEndCall} className="inline-flex h-11 items-center justify-center gap-2 rounded-[9px] bg-error px-5 text-sm font-semibold text-white transition hover:bg-error/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 focus-visible:ring-offset-background"><PhoneOff size={16} />End call</button>}
         {!canCall && !connect && callStatus !== "connecting" && callStatus !== "disconnected" && <p className="px-3 text-center text-xs text-muted-foreground">{mode === "room" && !receiver ? "Waiting for one more person to join" : !receiver ? "Choose a person to begin" : "Call service is reconnecting"}</p>}
       </div>
